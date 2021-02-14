@@ -41,7 +41,7 @@ int main(void){
 				PORTA |= (1 << PA2); //ustawienie wartosci 1 na pinie 2 portu A, czyli wylaczenie diody
 				led1 = 0;
 			}
-			while(!(PINA & (1 << PINA0))){};
+			while(!(PINA & (1 << PINA0))){}
 		}
 		
 
@@ -58,7 +58,7 @@ int main(void){
 				PORTA |= (1 << PA3);
 				led2 = 0;
 			}
-			while(!(PINA & (1 << PINA1))){};
+			while(!(PINA & (1 << PINA1))){}
 		}
 
 	}
