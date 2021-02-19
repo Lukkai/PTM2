@@ -15,6 +15,5 @@ compile:
 clean:
 	rm $(FILENAME).o
 	rm ${LIBNAME}.o
-	rm ${LIBNAME2}.o
 	rm $(FILENAME).elf
 	rm $(FILENAME).hex

@@ -2,7 +2,7 @@
  *  Cwiczenie 3
  *  regulator dwustawny z histerezą oraz wyswietlanie stanu na LCD
  * 
- *  Created on: 21 stycznia 2011
+ *  Created on: 14 luty 2011
  *      Author: Lukasz Chwistek
  */
 
@@ -16,79 +16,80 @@
 #include "GLOBAL.h"
 #include "HD44780.h"
 
-
 static void ADC_init()
 {
-	ADMUX = 0;
-	ADCSRA = 1<<ADPS0| 1<< ADPS1	| 1<< ADPS2	| 1<<ADEN;
+	ADMUX = (1<<REFS0);											  //napiecie referencyjne AVcc 5V
+	ADCSRA = (1<<ADPS0) | (1<< ADPS1) | (1<< ADPS2) | (1<<ADEN);  //prescaler 128,  enable conversion
 }
-static int32_t ADC_czytaj()
+
+static uint16_t ADC_10bit()
 {
-	ADCSRA|= (1<<ADSC);
-	while (ADCSRA & (1<<ADSC));
+	ADCSRA|= (1<<ADSC);										//start conversion
+	while (ADCSRA & (1<<ADSC));								//wykonanie pomiaru
 	return ADC;
 }
 
-void wyswietl (int32_t in, int32_t out, double histereza)
+void write (int16_t in, int16_t out, float histeresis)	//wypisywanie na wyswietlaczu
 {
-	double Vmin=0;
-	double Vmax=5;
-	char wejscie[16], wyjscie[16], hist[16];
-	double wynik=(in/1023.0)*(Vmax-Vmin)+Vmin;
-	dtostrf(wynik,0,3,wejscie);
-	dtostrf(out,0,3,wyjscie);
-	dtostrf(histereza,0,3,hist);
-	LCD_Clear();	// czyszczenie lcd
-	LCD_WriteText(wejscie);
+	float Vmin=0.0f;
+	float Vmax=5.0f;
+	char input[16], output[16], hist[16];
+	float value=((float)in/1024.0f)*(Vmax-Vmin)+Vmin;
+	dtostrf(value,0,3,input);
+	dtostrf(out,0,3,output);
+	dtostrf(histeresis,0,3,hist);
+	LCD_Clear();
+	LCD_WriteText(input);
 	LCD_WriteText(" V");
 	LCD_GoTo(0,1);
-	LCD_WriteText(wyjscie);
+	LCD_WriteText(output);
 	LCD_WriteText(" H: ");
 	LCD_WriteText(hist);
 }
 
 int main()
 {
-	DDRA|=(1<<PA1);
-	sbi(PORTC,PC7);
-	sbi(PORTC,PC6);
-	int32_t in;
-	int32_t out;
+	DDRD|=(1<<DDD0);
+	PORTC |= (1 << PC6) | (1 << PC7);
+	int16_t in;
+	int16_t out;
 	ADC_init();
 	LCD_Initialize();
-	double histereza=0.1;
-	double up = 0.5 + histereza;
-	double down = 0.5 - histereza;
+	const float setpoint = 0.5f;
+	volatile float histeresis = 0.1f;
+	float on = setpoint + histeresis;
+	float off = setpoint - histeresis;
 	while(1)
 	{
-		if(bit_is_clear(PINC,7))
+		if(!(PINC & (1<<PIN7)))
 		{
-			histereza+=0.05;
+			histeresis+=0.05f;
 		}
-		if (bit_is_clear(PINC,6))
+		if (!(PINC & (1<<PIN6)))
 		{
-			if(histereza>0)
-				{
-					histereza-=0.05;
-				}
+			if(histeresis>0)
+			{
+				histeresis-=0.05f;
+			}
 		}
-		up = 0.5 + histereza;
-		down = 0.5 - histereza;
-		int wlacz=up*1023;
-		int zgas=down*1023;
+		on = setpoint + histeresis;
+		off = setpoint - histeresis;
 
-		in=ADC_czytaj();
-		if( in > wlacz)
+		int16_t outon = on*1024;
+		int16_t outoff = off*1024;
+
+		in=ADC_10bit();
+		if(in > outon)
 		{
 			out=1;
-			sbi(PORTA,1);
+			PORTD |= (1 << PD0);
 		}
-		else if (in < zgas )
+		else if (in < outoff)
 		{
 			out=0;
-			cbi(PORTA,1);
+			PORTD &= ~(1 << PD0);
 		}
-		wyswietl(in,out,histereza);
+		write(in,out,histeresis);
 		_delay_ms(1000);
 	}
 }
