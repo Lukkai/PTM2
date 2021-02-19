@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "hd44780.h": "c",
-        "io.h": "c"
-    }
-}

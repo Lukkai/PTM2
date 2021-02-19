@@ -1,8 +1,8 @@
 /*
- *  Cwiczenie 3
+ *  Cwiczenie 4
  *  regulator dwustawny z histerezą oraz wyswietlanie stanu na LCD
  * 
- *  Created on: 14 luty 2011
+ *  Created on: 14 luty 2021
  *      Author: Lukasz Chwistek
  */
 

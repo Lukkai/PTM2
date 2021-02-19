@@ -2,9 +2,9 @@
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [                
+            "includePath": [
                 "${workspaceFolder}/${relativeFileDirname}/**",
-                "${workspaceFolder}/cw4/LCD HD44780",
+                "${workspaceFolder}/cw4/",
                 "/usr/lib/avr/include/avr",
                 "/usr/lib/gcc/avr/5.4.0/plugin/include",
                 "/usr/lib/gcc/avr",
